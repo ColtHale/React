@@ -10,6 +10,7 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 
+import org.jetbrains.annotations.NotNull;
 import primal.util.text.C;
 
 /**
@@ -194,6 +195,7 @@ public class PrimalSender implements CommandSender
 		return s.getName();
 	}
 
+	@NotNull
 	@Override
 	public Spigot spigot()
 	{

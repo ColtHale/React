@@ -21,7 +21,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ReactServer extends Thread {
+public class ReactServer extends Thread
+{
     public static ReactData reactData;
     public static GList<ReactRunnable> runnables;
     public static int requests;
@@ -33,8 +34,10 @@ public class ReactServer extends Thread {
     private RemoteController rc;
     private long ms;
 
-    public ReactServer(int port) throws IOException {
-        try {
+    public ReactServer(int port) throws IOException
+    {
+        try
+        {
             size = 0;
             perc = 0;
             System.out.println("Starting React Server @ " + Bukkit.getIp() + ":" + port);
@@ -46,42 +49,53 @@ public class ReactServer extends Thread {
             rc = new RemoteController();
             setName("React Legacy Remote Server");
 
-            for (ActionType i : ActionType.values()) {
+            for (ActionType i : ActionType.values())
+            {
                 System.out.print(i.name());
 
-                if (!React.instance.actionController.getAction(i).getHandleType().equals(ActionHandle.AUTOMATIC)) {
+                if (!React.instance.actionController.getAction(i).getHandleType().equals(ActionHandle.AUTOMATIC))
+                {
                     actions.add(i.getName());
                 }
             }
 
             running = true;
-        } catch (Exception ignored) {
+        } catch (Exception ignored)
+        {
 
         }
     }
 
     @Override
-    public void run() {
-        if (!running) {
+    public void run()
+    {
+        if (!running)
+        {
             return;
         }
 
-        try {
+        try
+        {
             Thread.sleep(1000);
-        } catch (InterruptedException e1) {
+        } catch (InterruptedException e1)
+        {
             return;
         }
 
         ms = M.ms();
 
-        while (running) {
-            if (Thread.interrupted()) {
+        while (running)
+        {
+            if (Thread.interrupted())
+            {
                 System.out.println("React Remote Interrupted");
                 running = false;
 
-                try {
+                try
+                {
                     serverSocket.close();
-                } catch (IOException e) {
+                } catch (IOException e)
+                {
                     e.printStackTrace();
                 }
 
@@ -89,7 +103,8 @@ public class ReactServer extends Thread {
                 return;
             }
 
-            try {
+            try
+            {
                 Socket s = serverSocket.accept();
                 DataInputStream i = new DataInputStream(s.getInputStream());
                 DataOutputStream o = new DataOutputStream(s.getOutputStream());
@@ -97,26 +112,32 @@ public class ReactServer extends Thread {
                 PacketResponse response = new PacketResponse();
                 ReactUser u = rc.auth(request.getUsername(), request.getPassword());
 
-                if (u != null) {
+                if (u != null)
+                {
                     handleCommand(request.getCommand(), response, request.getUsername(), u);
                     requests++;
-                } else {
+                } else
+                {
                     response.put("type", PacketResponseType.ERROR_INVALID_LOGIN);
                 }
 
                 o.writeUTF(response.toString());
                 o.flush();
                 s.close();
-            } catch (IOException ignored) {
+            } catch (IOException ignored)
+            {
             }
         }
     }
 
-    public void handleCommand(String command, final PacketResponse response, String name, ReactUser u) {
-        if (command.equals(PacketRequestType.GET_SAMPLES.toString())) {
+    public void handleCommand(String command, final PacketResponse response, String name, ReactUser u)
+    {
+        if (command.equals(PacketRequestType.GET_SAMPLES.toString()))
+        {
             response.put("type", PacketResponseType.OK);
             reactData.sample();
-            for (String i : reactData.getSamples().keySet()) {
+            for (String i : reactData.getSamples().keySet())
+            {
                 response.put(i, reactData.getSamples().get(i));
             }
 
@@ -148,58 +169,77 @@ public class ReactServer extends Thread {
             String data = console.toString("\n");
 
             response.put("console-s", u.canViewConsole() ? data : StringUtils.repeat("\n", 40) + "Sorry! You do not have permission to view the console!\n\n=== IDENTITY ===\n" + u.toString());
-        } else if (command.equals(PacketRequestType.GET_ACTIONS.toString())) {
+        } else if (command.equals(PacketRequestType.GET_ACTIONS.toString()))
+        {
             response.put("type", PacketResponseType.OK);
             response.put("actions", actions);
-        } else if (command.equals(PacketRequestType.GET_TIMINGS.toString())) {
+        } else if (command.equals(PacketRequestType.GET_TIMINGS.toString()))
+        {
             // Not Supported on React6
             response.put("timings", "");
-        } else if (command.equals(PacketRequestType.GET_BASIC.toString())) {
+        } else if (command.equals(PacketRequestType.GET_BASIC.toString()))
+        {
             response.put("type", PacketResponseType.OK);
             response.put("version", Bukkit.getVersion());
             response.put("version-bukkit", Bukkit.getBukkitVersion());
-        } else if (command.startsWith("COMMAND ")) {
+        } else if (command.startsWith("COMMAND "))
+        {
             String cmd = command.replaceFirst("COMMAND ", "");
 
             response.put("type", PacketResponseType.OK);
 
-            runnables.add(new ReactRunnable() {
+            runnables.add(new ReactRunnable()
+            {
                 @Override
-                public void run() {
+                public void run()
+                {
                     l("Received Remote command: " + cmd);
 
-                    if (u.canUseConsole()) {
-                        new S("tcommand-server") {
+                    if (u.canUseConsole())
+                    {
+                        new S("tcommand-server")
+                        {
                             @Override
-                            public void run() {
+                            public void run()
+                            {
                                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
                             }
                         };
-                    } else {
+                    } else
+                    {
                         l("Permission denied for remote user: " + name + " to use command " + cmd);
                     }
                 }
             });
-        } else if (command.startsWith("ACTION ")) {
+        } else if (command.startsWith("ACTION "))
+        {
             boolean fi = false;
 
-            for (final String i : actions) {
-                if (command.equalsIgnoreCase("ACTION " + i)) {
+            for (final String i : actions)
+            {
+                if (command.equalsIgnoreCase("ACTION " + i))
+                {
                     fi = true;
                     response.put("type", PacketResponseType.OK);
 
-                    runnables.add(new ReactRunnable() {
+                    runnables.add(new ReactRunnable()
+                    {
                         @Override
-                        public void run() {
-                            for (ActionType j : ActionType.values()) {
-                                if (j.getName().equalsIgnoreCase(i)) {
+                        public void run()
+                        {
+                            for (ActionType j : ActionType.values())
+                            {
+                                if (j.getName().equalsIgnoreCase(i))
+                                {
                                     l("Action Packet Received: " + j.getName() + " (ran by " + name + ")");
 
-                                    if (u.canUseActions()) {
+                                    if (u.canUseActions())
+                                    {
                                         l("Action " + j.getName() + " Executed");
                                         React.instance.actionController.fire(j, new ConsoleActionSource());
                                         return;
-                                    } else {
+                                    } else
+                                    {
                                         l("Permission denied for remote user: " + name + " to use action " + j.getName());
                                     }
                                 }
@@ -209,29 +249,35 @@ public class ReactServer extends Thread {
                 }
             }
 
-            if (!fi) {
+            if (!fi)
+            {
                 response.put("type", PacketResponseType.ERROR_INVALID_ACTION);
             }
-        } else {
+        } else
+        {
             response.put("type", PacketResponseType.ERROR_INVALID_REQUEST);
         }
     }
 
-    public void l(String s) {
+    public void l(String s)
+    {
         System.out.println("[ReactServer]: " + s);
     }
 
 
     @SuppressWarnings("deprecation")
-    public void destroy() {
-        try {
+    public void destroy()
+    {
+        try
+        {
             super.interrupt();
             super.stop();
             this.running = false;
             this.serverSocket.close();
             this.actions = null;
             this.rc = null;
-        } catch (Throwable t) {
+        } catch (Throwable t)
+        {
             t.printStackTrace();
         }
     }

@@ -7,8 +7,8 @@ import com.volmit.react.util.Area;
 import com.volmit.react.util.Controller;
 import com.volmit.react.util.S;
 import com.volmit.react.util.TICK;
+import net.minecraft.server.v1_12_R1.EntityArrow;
 import org.bukkit.entity.*;
-import org.bukkit.entity.Arrow.PickupStatus;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -20,37 +20,46 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import primal.json.JSONObject;
 import primal.lang.collection.GList;
 
-public class InstantDropController extends Controller {
+public class InstantDropController extends Controller
+{
     private GList<Integer> ignore;
 
     @Override
-    public void dump(JSONObject object) {
+    public void dump(JSONObject object)
+    {
         object.put("ignored", ignore.size());
     }
 
     @Override
-    public void start() {
+    public void start()
+    {
         Surge.register(this);
         ignore = new GList<Integer>();
     }
 
     @Override
-    public void stop() {
+    public void stop()
+    {
         Surge.unregister(this);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(BlockBreakEvent e) {
-        if (!Config.SKIP_ORBS) {
+    public void on(BlockBreakEvent e)
+    {
+        if (!Config.SKIP_ORBS)
+        {
             return;
         }
 
-        if (!Config.getWorldConfig(e.getBlock().getWorld()).allowXPHandling) {
+        if (!Config.getWorldConfig(e.getBlock().getWorld()).allowXPHandling)
+        {
             return;
         }
 
-        if (e.getPlayer() != null) {
-            if (e.getExpToDrop() > 0) {
+        if (e.getPlayer() != null)
+        {
+            if (e.getExpToDrop() > 0)
+            {
                 e.getPlayer().giveExp(e.getExpToDrop());
                 e.setExpToDrop(0);
             }
@@ -58,12 +67,15 @@ public class InstantDropController extends Controller {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(PlayerDropItemEvent e) {
-        if (!Config.DROPS_INSTADROP) {
+    public void on(PlayerDropItemEvent e)
+    {
+        if (!Config.DROPS_INSTADROP)
+        {
             return;
         }
 
-        if (!Config.getWorldConfig(e.getPlayer().getWorld()).allowDropHandling) {
+        if (!Config.getWorldConfig(e.getPlayer().getWorld()).allowDropHandling)
+        {
             return;
         }
 
@@ -71,36 +83,46 @@ public class InstantDropController extends Controller {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(EntityDeathEvent e) {
-        if (!Config.SKIP_ORBS) {
+    public void on(EntityDeathEvent e)
+    {
+        if (!Config.SKIP_ORBS)
+        {
             return;
         }
 
-        if (!Config.getWorldConfig(e.getEntity().getWorld()).allowXPHandling) {
+        if (!Config.getWorldConfig(e.getEntity().getWorld()).allowXPHandling)
+        {
             return;
         }
 
-        if (e.getEntity().getKiller() != null) {
+        if (e.getEntity().getKiller() != null)
+        {
             e.getEntity().getKiller().giveExp(e.getDroppedExp());
             e.setDroppedExp(0);
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(PlayerMoveEvent e) {
-        if (!Config.FAST_ORB_PICKUP) {
+    public void on(PlayerMoveEvent e)
+    {
+        if (!Config.FAST_ORB_PICKUP)
+        {
             return;
         }
 
-        if (!Config.getWorldConfig(e.getPlayer().getWorld()).allowXPHandling) {
+        if (!Config.getWorldConfig(e.getPlayer().getWorld()).allowXPHandling)
+        {
             return;
         }
 
-        if (TICK.tick % 14 == 0) {
+        if (TICK.tick % 14 == 0)
+        {
             Area a = new Area(e.getPlayer().getLocation(), 2.3);
 
-            for (Entity i : a.getNearbyEntities()) {
-                if (i instanceof ExperienceOrb) {
+            for (Entity i : a.getNearbyEntities())
+            {
+                if (i instanceof ExperienceOrb)
+                {
                     e.getPlayer().giveExp(((ExperienceOrb) i).getExperience());
                     i.remove();
                 }
@@ -109,26 +131,34 @@ public class InstantDropController extends Controller {
     }
 
     @EventHandler
-    public void on(ProjectileHitEvent e) {
-        if (!Config.DESPAWN_USELESS_ARROWS) {
+    public void on(ProjectileHitEvent e)
+    {
+        if (!Config.DESPAWN_USELESS_ARROWS)
+        {
             return;
         }
 
-        if (!Capability.ARROW_OWNER.isCapable()) {
+        if (!Capability.ARROW_OWNER.isCapable())
+        {
             return;
         }
 
-        if (!Config.getWorldConfig(e.getEntity().getWorld()).allowDropHandling) {
+        if (!Config.getWorldConfig(e.getEntity().getWorld()).allowDropHandling)
+        {
             return;
         }
 
-        if (e.getEntityType().equals(EntityType.ARROW)) {
-            Arrow a = (Arrow) e.getEntity();
+        if (e.getEntityType().equals(EntityType.ARROW))
+        {
+            AbstractArrow a = (AbstractArrow) e.getEntity();
 
-            new S("arrow.remove-check") {
+            new S("arrow.remove-check")
+            {
                 @Override
-                public void run() {
-                    if (a.isOnGround() && !a.getPickupStatus().equals(PickupStatus.ALLOWED)) {
+                public void run()
+                {
+                    if (a.isOnGround() && !a.getPickupStatus().equals(EntityArrow.PickupStatus.ALLOWED))
+                    {
                         a.remove();
                     }
                 }
@@ -137,16 +167,20 @@ public class InstantDropController extends Controller {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void on(ItemSpawnEvent e) {
-        if (!Config.DROPS_INSTADROP) {
+    public void on(ItemSpawnEvent e)
+    {
+        if (!Config.DROPS_INSTADROP)
+        {
             return;
         }
 
-        if (!Config.getWorldConfig(e.getEntity().getWorld()).allowDropHandling) {
+        if (!Config.getWorldConfig(e.getEntity().getWorld()).allowDropHandling)
+        {
             return;
         }
 
-        if (ignore.contains(e.getEntity().getEntityId())) {
+        if (ignore.contains(e.getEntity().getEntityId()))
+        {
             ignore.remove((Integer) e.getEntity().getEntityId());
             return;
         }
@@ -154,22 +188,28 @@ public class InstantDropController extends Controller {
         double dd = Double.MAX_VALUE;
         Player p = null;
 
-        for (Player i : new Area(e.getEntity().getLocation(), 5.5).getNearbyPlayers()) {
+        for (Player i : new Area(e.getEntity().getLocation(), 5.5).getNearbyPlayers())
+        {
             double dv = i.getLocation().distanceSquared(e.getEntity().getLocation());
-            if (dv < dd) {
+            if (dv < dd)
+            {
                 dd = dv;
                 p = i;
             }
         }
 
         Player f = p;
-        if (p != null) {
+        if (p != null)
+        {
             e.getEntity().setPickupDelay(0);
 
-            if (Config.DROPS_TELEPORT) {
-                new S("tp-entity-drop") {
+            if (Config.DROPS_TELEPORT)
+            {
+                new S("tp-entity-drop")
+                {
                     @Override
-                    public void run() {
+                    public void run()
+                    {
                         e.getEntity().teleport(f.getLocation());
                     }
                 };
@@ -178,17 +218,20 @@ public class InstantDropController extends Controller {
     }
 
     @Override
-    public void tick() {
+    public void tick()
+    {
 
     }
 
     @Override
-    public int getInterval() {
+    public int getInterval()
+    {
         return 1115;
     }
 
     @Override
-    public boolean isUrgent() {
+    public boolean isUrgent()
+    {
         return false;
     }
 }

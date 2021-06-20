@@ -11,29 +11,36 @@ import com.volmit.react.util.S;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public class ActionCollectGarbage extends Action {
-    public ActionCollectGarbage() {
+public class ActionCollectGarbage extends Action
+{
+    public ActionCollectGarbage()
+    {
         super(ActionType.COLLECT_GARBAGE);
 
         setNodes(Info.ACTION_COLLECT_GARBAGE_TAGS);
     }
 
     @Override
-    public void enact(IActionSource source, ISelector... selectors) {
+    public void enact(IActionSource source, ISelector... selectors)
+    {
         source.sendResponseActing(Lang.getString("react.action.collect-garbagecollecting-garbage")); //$NON-NLS-1$
 
         long mbmem = Runtime.getRuntime().freeMemory();
         System.gc();
         long mbnex = Runtime.getRuntime().freeMemory();
 
-        new S("action.response.gc") {
+        new S("action.response.gc")
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 long freed = mbnex - mbmem;
 
-                if (freed > 0) {
+                if (freed > 0)
+                {
                     source.sendResponseSuccess(Lang.getString("react.action.collect-garbagecollected") + F.memSize(freed) + Lang.getString("react.action.collect-garbageof-garbage")); //$NON-NLS-1$ //$NON-NLS-2$
-                } else {
+                } else
+                {
                     source.sendResponseError(Lang.getString("react.action.collect-garbageno-free")); //$NON-NLS-1$
                 }
 
@@ -43,12 +50,14 @@ public class ActionCollectGarbage extends Action {
     }
 
     @Override
-    public ItemStack getIcon() {
+    public ItemStack getIcon()
+    {
         return new ItemStack(Material.FLOWER_POT_ITEM);
     }
 
     @Override
-    public String getNode() {
+    public String getNode()
+    {
         return "gc";
     }
 }

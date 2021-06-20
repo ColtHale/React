@@ -2,6 +2,7 @@ package com.volmit.react.util;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Math
@@ -30,11 +31,8 @@ public class M {
      * @return true if true
      */
     public static boolean r(Double d) {
-        if (d == null) {
-            return Math.random() < 0.5;
-        }
+        return Math.random() < Objects.requireNonNullElse(d, 0.5);
 
-        return Math.random() < d;
     }
 
     /**
